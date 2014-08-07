@@ -99,6 +99,9 @@ class tx_css2inline_pi1 extends tslib_pibase {
 		// process the CSS here, turning the CSS style blocks into inline css
 		$unprocessableHTMLTags = implode('|',$this->unprocessableHTMLTags);
 		$body = preg_replace("/<($unprocessableHTMLTags)[^>]*>/i",'',$this->html);
+		if (empty($body)) {
+			return $body;
+		}
 
 		$xmldoc = new DOMDocument();
 		$xmldoc->strictErrorChecking = false;
