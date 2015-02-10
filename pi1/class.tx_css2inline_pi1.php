@@ -107,7 +107,9 @@ class tx_css2inline_pi1 extends tslib_pibase {
 		$xmldoc->strictErrorChecking = false;
 		$xmldoc->formatOutput = true;
 		$xmldoc->encoding = $this->encoding;
+		$errors = libxml_use_internal_errors(true);
 		$xmldoc->loadHTML($body);
+		libxml_use_internal_errors($errors);
 		$xmldoc->normalizeDocument();
 
 		$xpath = new DOMXPath($xmldoc);
