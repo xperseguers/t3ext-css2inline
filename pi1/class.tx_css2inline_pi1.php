@@ -172,22 +172,31 @@ class tx_css2inline_pi1 extends tslib_pibase {
 	// right now we only support CSS 1 selectors, but include CSS2/3 selectors are fully possible.
 	// http://plasmasturm.org/log/444/
 	private function translateCSStoXpath($css_selector) {
+		$result = trim($css_selector);
+
 		// returns an Xpath selector
+
 		$search = array(
-												'/\s+>\s+/', // Matches any F element that is a child of an element E.
-												'/(\w+)\s+\+\s+(\w+)/', // Matches any F element that is a child of an element E.
-												'/\s+/', // Matches any F element that is a descendant of an E element.
-												'/(\w+)?\#([\w\-]+)/e', // Matches id attributes
-												'/(\w+)?\.([\w\-]+)/e', // Matches class attributes
+			'/\s+>\s+/', // Matches any F element that is a child of an element E.
+			'/(\w+)\s+\+\s+(\w+)/', // Matches any F element that is a child of an element E.
+			'/\s+/', // Matches any F element that is a descendant of an E element.
 		);
 		$replace = array(
-												'/',
-												'\\1/following-sibling::*[1]/self::\\2',
-												'//',
-												"(strlen('\\1') ? '\\1' : '*').'[@id=\"\\2\"]'",
-												"(strlen('\\1') ? '\\1' : '*').'[contains(concat(\" \",@class,\" \"),concat(\" \",\"\\2\",\" \"))]'",
+			'/',
+			'\\1/following-sibling::*[1]/self::\\2',
+			'//',
 		);
-		return '//'.preg_replace($search,$replace,trim($css_selector));
+		$result = preg_replace($search, $replace, $result);
+
+		$result = preg_replace_callback('/(\w+)?\#([\w\-]+)/', function($matches) {
+			return (strlen($matches[1]) ? $matches[1] : '*') . '[@id="' . $matches[2] . '"]';
+		}, $result);
+
+		$result = preg_replace_callback('/(\w+)?\.([\w\-]+)/', function($matches) {
+			return (strlen($matches[1]) ? $matches[1] : '*') . '[contains(concat(" ",@class," "),concat(" ","' . $matches[2] . '"," "))]';
+		}, $result);
+
+		return '//' . $result;
 	}
 
 	private function cssStyleDefinitionToArray($style) {
