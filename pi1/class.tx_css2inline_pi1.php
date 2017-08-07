@@ -37,7 +37,7 @@
  * @package	TYPO3
  * @subpackage	tx_css2inline
  */
-class tx_css2inline_pi1 extends tslib_pibase {
+class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin {
 	var $prefixId      = 'tx_css2inline_pi1';		// Same as class name
 	var $scriptRelPath = 'pi1/class.tx_css2inline_pi1.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 'css2inline';	// The extension key.
@@ -62,7 +62,7 @@ class tx_css2inline_pi1 extends tslib_pibase {
 		$this->encoding = $charset?$charset:'iso-8859-1';
 		$this->setCSS($css);
 		$this->setHTML($html);
-		if ($conf['removeAttributes']) $this->removeAttributes = t3lib_div::trimExplode(',', $conf['removeAttributes']);
+		if ($conf['removeAttributes']) $this->removeAttributes = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $conf['removeAttributes']);
 		return html_entity_decode($this->emogrify(),ENT_QUOTES,$this->encoding);
 	}
 	/*
