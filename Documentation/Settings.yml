@@ -6,8 +6,8 @@
 conf.py:
   copyright: 2002-2017
   project: CSS to inline converter for direct mail
-  version: 0.2
-  release: 0.2.0
+  version: 0.3
+  release: 0.3.0-dev
   latex_documents:
   - - Index
     - css2inline.tex
