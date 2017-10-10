@@ -111,6 +111,8 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
     // applies the CSS you submit to the html you submit. places the css inline
     public function emogrify()
     {
+        $cssSelectorErrors = [];
+
         // process the CSS here, turning the CSS style blocks into inline css
         $unprocessableHTMLTags = implode('|', $this->unprocessableHTMLTags);
         $body = preg_replace("/<($unprocessableHTMLTags)[^>]*>/i", '', $this->html);
@@ -148,7 +150,16 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
                 if (strpos($selector, ':') !== false) continue;
 
                 // query the body for the xpath selector
-                $nodes = $xpath->query($this->translateCSStoXpath(trim($selector)));
+                $nodes = @$xpath->query($this->translateCSStoXpath(trim($selector)));
+                if ($nodes === false) {
+                    $line = __LINE__;
+                    $message = '<p style="color:red">DOMXPath::query() - Unsupported CSS selector: <strong>' . htmlspecialchars($selector) . '</strong></p>' . LF;
+                    $message .= '<p>Error raised in ' . __FILE__ . ' on line ' . ($line - 2) . '.</p>'; // -2 to point to the definition of $nodes
+                    $cssSelectorErrors[] = $message;
+
+                    // Continue to next CSS selector
+                    continue;
+                }
 
                 foreach ($nodes as $node) {
                     // if it has a style attribute, get it, process it, and append (overwrite) new stuff
@@ -182,8 +193,9 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
         }
 
 
-        return $xmldoc->saveHTML();
-
+        $html = implode(LF, $cssSelectorErrors);
+        $html .= $xmldoc->saveHTML();
+        return $html;
     }
 
     // right now we only support CSS 1 selectors, but include CSS2/3 selectors are fully possible.
