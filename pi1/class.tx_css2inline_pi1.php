@@ -46,7 +46,7 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
 
     private $html = '';
     private $css = '';
-    private $unprocessableHTMLTags = array('wbr');
+    private $unprocessableHTMLTags = ['wbr'];
 
     /**
      * The main method of the PlugIn
@@ -194,16 +194,16 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
 
         // returns an Xpath selector
 
-        $search = array(
+        $search = [
             '/\s+>\s+/', // Matches any F element that is a child of an element E.
             '/(\w+)\s+\+\s+(\w+)/', // Matches any F element that is a child of an element E.
             '/\s+/', // Matches any F element that is a descendant of an E element.
-        );
-        $replace = array(
+        ];
+        $replace = [
             '/',
             '\\1/following-sibling::*[1]/self::\\2',
             '//',
-        );
+        ];
         $result = preg_replace($search, $replace, $result);
 
         $result = preg_replace_callback('/(\w+)?\#([\w\-]+)/', function ($matches) {
@@ -220,7 +220,7 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
     private function cssStyleDefinitionToArray($style)
     {
         $definitions = explode(';', $style);
-        $retArr = array();
+        $retArr = [];
         foreach ($definitions as $def) {
             list($key, $value) = preg_split('/:/', $def, 2, PREG_SPLIT_NO_EMPTY);
             if (empty($key) || !isset($value)) continue;
