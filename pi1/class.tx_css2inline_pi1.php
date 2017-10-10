@@ -42,7 +42,6 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
     var $scriptRelPath = 'pi1/class.tx_css2inline_pi1.php';    // Path to this script relative to the extension dir.
     var $extKey = 'css2inline';    // The extension key.
     var $pi_checkCHash = true;
-    var $encoding = '';
 
     private $html = '';
     private $css = '';
@@ -59,12 +58,10 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
     {
         $css = $this->cObj->cObjGetSingle($conf['css'], $conf['css.']);
         $html = $this->cObj->cObjGetSingle($conf['html'] ?: 'COA', $conf['html.']);
-        $charset = $GLOBALS['TSFE']->config['config']['renderCharset'];
-        $this->encoding = $charset ? $charset : 'iso-8859-1';
         $this->setCSS($css);
         $this->setHTML($html);
         if ($conf['removeAttributes']) $this->removeAttributes = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $conf['removeAttributes']);
-        return html_entity_decode($this->emogrify(), ENT_QUOTES, $this->encoding);
+        return html_entity_decode($this->emogrify(), ENT_QUOTES, 'UTF-8');
     }
     /*
      *
@@ -123,7 +120,7 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
         $xmldoc = new DOMDocument();
         $xmldoc->strictErrorChecking = false;
         $xmldoc->formatOutput = true;
-        $xmldoc->encoding = $this->encoding;
+        $xmldoc->encoding = 'UTF-8';
         $errors = libxml_use_internal_errors(true);
         $xmldoc->loadHTML($body);
         libxml_use_internal_errors($errors);
