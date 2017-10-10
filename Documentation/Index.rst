@@ -7,9 +7,9 @@
 
 .. _start:
 
-============================================
-EXT: CSS to inline converter for direct mail
-============================================
+=======================================
+CSS to inline converter for direct mail
+=======================================
 
 .. only:: html
 
@@ -27,16 +27,16 @@ EXT: CSS to inline converter for direct mail
         email clients. Can be used as a post-processing stdWrap in TypoScript.
 
     :Keywords:
-        CSS, styles, inline, html
+        CSS, styles, inline, html, newsletters
 
     :Copyright:
-        2002-2010
+        2002-2017
 
     :Author:
-        Olivier Schopfer
+        Olivier Schopfer, Xavier Perseguers
 
     :Email:
-        ops@wcc-coe.org
+        ops@wcc-coe.org, xavier@causal.ch
 
     :License:
         This document is published under the Open Publication License
@@ -49,6 +49,12 @@ EXT: CSS to inline converter for direct mail
     a GNU/GPL CMS/Framework available from `www.typo3.org <https://typo3.org/>`__.
 
 
+    **Other version of this document**
+
+    :PDF:
+        http://docs.typo3.org/typo3cms/extensions/css2inline/0.2.0/_pdf/
+
+
     **Table of Contents**
 
 .. toctree::
@@ -59,6 +65,5 @@ EXT: CSS to inline converter for direct mail
     UsersManual/Index
     Administration/Index
     Configuration/Index
-    BugReportsAndSvnRepository/Index
     KnownProblems/Index
-    Changelog/Index
+    Links

@@ -4,8 +4,18 @@
 
 ---
 conf.py:
-  copyright: 2002-2010
-  project: EXT: CSS to inline converter for direct mail
-  version: 0.1
-  release: 0.1.6-dev
+  copyright: 2002-2017
+  project: CSS to inline converter for direct mail
+  version: 0.2
+  release: 0.2.0-dev
+  latex_documents:
+  - - Index
+    - css2inline.tex
+    - CSS to inline converter for direct mail
+    - Xavier Perseguers
+    - manual
+  latex_elements:
+    papersize: a4paper
+    pointsize: 10pt
+    preamble: \usepackage{typo3}
 ...

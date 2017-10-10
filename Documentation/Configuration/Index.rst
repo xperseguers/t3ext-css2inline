@@ -122,7 +122,7 @@ html              cObject     Same principle.                                   
 
                               page.10.html.30.value = </html>
 
-                              Don't forget to set the doctype in typo3 as well, using
+                              Don't forget to set the doctype in TYPO3 as well, using
                               the **config.doctype**  or **page.config.doctype**
                               directive, see the TSRef manual. This setting impacts
                               how typo3 generates html.
