@@ -38,203 +38,45 @@
  */
 class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
 {
-    var $prefixId = 'tx_css2inline_pi1';        // Same as class name
-    var $scriptRelPath = 'pi1/class.tx_css2inline_pi1.php';    // Path to this script relative to the extension dir.
-    var $extKey = 'css2inline';    // The extension key.
-    var $pi_checkCHash = true;
 
-    private $html = '';
-    private $css = '';
-    private $unprocessableHTMLTags = ['wbr'];
+    public $prefixId = 'tx_css2inline_pi1';
+    public $scriptRelPath = 'pi1/class.tx_css2inline_pi1.php';
+    public $extKey = 'css2inline';
+    public $pi_checkCHash = true;
 
     /**
-     * The main method of the PlugIn
+     * The main method of the plugin.
      *
-     * @param    string $content : The PlugIn content
-     * @param    array $conf : The PlugIn configuration
-     * @return    The content that is displayed on the website
+     * @param string $content The plugin content
+     * @param array $conf The plugin configuration
+     * @return string The content that is displayed on the website
      */
-    function main($content, $conf)
+    public function main($content, array $conf)
     {
+        // Require 3rd-party libraries, in case TYPO3 does not run in composer mode
+        $pharFileName = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath($this->extKey) . 'Libraries/pelago-emogrifier.phar';
+        if (is_file($pharFileName)) {
+            @include 'phar://' . $pharFileName . '/vendor/autoload.php';
+        }
+
         $css = $this->cObj->cObjGetSingle($conf['css'], $conf['css.']);
         $html = $this->cObj->cObjGetSingle($conf['html'] ?: 'COA', $conf['html.']);
-        $this->setCSS($css);
-        $this->setHTML($html);
-        if ($conf['removeAttributes']) $this->removeAttributes = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $conf['removeAttributes']);
-        return html_entity_decode($this->emogrify(), ENT_QUOTES, 'UTF-8');
-    }
-    /*
-     *
-     * Library taken from http://www.pelagodesign.com/sidecar/emogrifier/
-    UPDATES
 
-    2008-08-10  Fixed CSS comment stripping regex to add PCRE_DOTALL (changed from '/\/\*.*\*\//U' to '/\/\*.*\*\//sU')
-    2008-08-18  Added lines instructing DOMDocument to attempt to normalize HTML before processing
-    2008-10-20  Fixed bug with bad variable name... Thanks Thomas!
+        $emogrifier = new \Pelago\Emogrifier($html, $css);
 
-     */
-    // you can extend this to support file input/output or just add new functions to this class!
+        /**
+         * By default, Emogrifier will grab all <style> blocks in the HTML and will apply the CSS styles as inline
+         * "style" attributes to the HTML. The <style> blocks will then be removed from the HTML. If you want to disable
+         * this functionality so that Emogrifier leaves these <style> blocks in the HTML and does not parse them, you
+         * should use this option. If you use this option, the contents of the <style> blocks will not be applied as
+         * inline styles and any CSS you want Emogrifier to use must be passed in.
+         */
+        $emogrifier->disableStyleBlocksParsing();
 
+        // Merge HTML and CSS
+        $mergedHtml = $emogrifier->emogrify();
 
-    public function __construct($html = '', $css = '')
-    {
-        $this->html = $html;
-        $this->css = $css;
+        return $mergedHtml;
     }
 
-    public function setHTML($html = '')
-    {
-        $this->html = $html;
-    }
-
-    public function setCSS($css = '')
-    {
-        $this->css = $css;
-    }
-
-    // there are some HTML tags that DOMDocument cannot process, and will throw an error if it encounters them.
-    // these functions allow you to add/remove them if necessary
-    public function addUnprocessableHTMLTag($tag)
-    {
-        $this->unprocessableHTMLTags[] = $tag;
-    }
-
-    public function removeUnprocessableHTMLTag($tag)
-    {
-        if (($key = array_search($tag, $this->unprocessableHTMLTags)) !== false)
-            unset($this->unprocessableHTMLTags[$key]);
-    }
-
-    // applies the CSS you submit to the html you submit. places the css inline
-    public function emogrify()
-    {
-        $cssSelectorErrors = [];
-
-        // process the CSS here, turning the CSS style blocks into inline css
-        $unprocessableHTMLTags = implode('|', $this->unprocessableHTMLTags);
-        $body = preg_replace("/<($unprocessableHTMLTags)[^>]*>/i", '', $this->html);
-        if (empty($body)) {
-            return $body;
-        }
-
-        $xmldoc = new DOMDocument();
-        $xmldoc->strictErrorChecking = false;
-        $xmldoc->formatOutput = true;
-        $xmldoc->encoding = 'UTF-8';
-        $errors = libxml_use_internal_errors(true);
-        $xmldoc->loadHTML($body);
-        libxml_use_internal_errors($errors);
-        $xmldoc->normalizeDocument();
-
-        $xpath = new DOMXPath($xmldoc);
-
-        // get rid of css comment code
-        $re_commentCSS = '/\/\*.*\*\//sU';
-        $css = preg_replace($re_commentCSS, '', $this->css);
-
-        // process the CSS file for selectors and definitions
-        $re_CSS = '/^\s*([^{]+){([^}]+)}/mis';
-        preg_match_all($re_CSS, $css, $matches);
-
-        foreach ($matches[1] as $key => $selectorString) {
-            // if there is a blank definition, skip
-            if (!strlen(trim($matches[2][$key]))) continue;
-
-            // split up the selector
-            $selectors = explode(',', $selectorString);
-            foreach ($selectors as $selector) {
-                // don't process pseudo-classes
-                if (strpos($selector, ':') !== false) continue;
-
-                // query the body for the xpath selector
-                $nodes = @$xpath->query($this->translateCSStoXpath(trim($selector)));
-                if ($nodes === false) {
-                    $line = __LINE__;
-                    $message = '<p style="color:red">DOMXPath::query() - Unsupported CSS selector: <strong>' . htmlspecialchars($selector) . '</strong></p>' . LF;
-                    $message .= '<p>Error raised in ' . __FILE__ . ' on line ' . ($line - 2) . '.</p>'; // -2 to point to the definition of $nodes
-                    $cssSelectorErrors[] = $message;
-
-                    // Continue to next CSS selector
-                    continue;
-                }
-
-                foreach ($nodes as $node) {
-                    // if it has a style attribute, get it, process it, and append (overwrite) new stuff
-                    if ($node->hasAttribute('style')) {
-                        $style = $node->getAttribute('style');
-                        // break it up into an associative array
-                        $oldStyleArr = $this->cssStyleDefinitionToArray($node->getAttribute('style'));
-                        $newStyleArr = $this->cssStyleDefinitionToArray($matches[2][$key]);
-
-                        // new styles overwrite the old styles (not technically accurate, but close enough)
-                        $combinedArr = array_merge($oldStyleArr, $newStyleArr);
-                        $style = '';
-                        foreach ($combinedArr as $k => $v) $style .= ($k . ':' . $v . ';');
-                    } else {
-                        // otherwise create a new style
-                        $style = trim($matches[2][$key]);
-                    }
-                    $node->setAttribute('style', $style);
-                }
-            }
-        }
-
-        // This removes styles from your email that contain display:none;. You could comment these out if you want.
-        // $nodes = $xpath->query('//*[contains(translate(@style," ",""),"display:none;")]');
-        // foreach ($nodes as $node) $node->parentNode->removeChild($node);
-        if ($this->removeAttributes) {
-            foreach ($this->removeAttributes as $attribute) {
-                $nodes = $xpath->query("//*[@" . $attribute . "]");
-                foreach ($nodes as $node) $node->removeAttribute($attribute);
-            }
-        }
-
-
-        $html = implode(LF, $cssSelectorErrors);
-        $html .= $xmldoc->saveHTML();
-        return $html;
-    }
-
-    // right now we only support CSS 1 selectors, but include CSS2/3 selectors are fully possible.
-    // http://plasmasturm.org/log/444/
-    private function translateCSStoXpath($css_selector)
-    {
-        $result = trim($css_selector);
-
-        // returns an Xpath selector
-
-        $search = [
-            '/\s+>\s+/', // Matches any F element that is a child of an element E.
-            '/(\w+)\s+\+\s+(\w+)/', // Matches any F element that is a child of an element E.
-            '/\s+/', // Matches any F element that is a descendant of an E element.
-        ];
-        $replace = [
-            '/',
-            '\\1/following-sibling::*[1]/self::\\2',
-            '//',
-        ];
-        $result = preg_replace($search, $replace, $result);
-
-        $result = preg_replace_callback('/(\w+)?\#([\w\-]+)/', function ($matches) {
-            return (strlen($matches[1]) ? $matches[1] : '*') . '[@id="' . $matches[2] . '"]';
-        }, $result);
-
-        $result = preg_replace_callback('/(\w+)?\.([\w\-]+)/', function ($matches) {
-            return (strlen($matches[1]) ? $matches[1] : '*') . '[contains(concat(" ",@class," "),concat(" ","' . $matches[2] . '"," "))]';
-        }, $result);
-
-        return '//' . $result;
-    }
-
-    private function cssStyleDefinitionToArray($style)
-    {
-        $definitions = explode(';', $style);
-        $retArr = [];
-        foreach ($definitions as $def) {
-            list($key, $value) = preg_split('/:/', $def, 2, PREG_SPLIT_NO_EMPTY);
-            if (empty($key) || !isset($value)) continue;
-            $retArr[trim($key)] = trim($value);
-        }
-        return $retArr;
-    }
 }

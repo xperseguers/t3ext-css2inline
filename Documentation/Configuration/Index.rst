@@ -51,9 +51,9 @@ html              cObject     Same principle.                                   
 
                               **Simple example with templaVoila:**
 
-                              page.10.html.10 = USER
+                              page.10.html = USER
 
-                              page.10.html.10.userFunc =
+                              page.10.html.userFunc =
                                   tx_templaVoila_pi1->main_page
 
                               **Example with old page mode:**
@@ -73,6 +73,8 @@ html              cObject     Same principle.                                   
                               **Example with utf-8 encoding:**
 
                               \# Head part
+
+                              page.10.html = COA
 
                               page.10.html.10 = TEXT
 
@@ -126,12 +128,6 @@ html              cObject     Same principle.                                   
                               the **config.doctype**  or **page.config.doctype**
                               directive, see the TSRef manual. This setting impacts
                               how typo3 generates html.
-----------------  ----------  -------------------------------------------------------  --------
-removeAttributes  String      Remove the listed attributes from the generated HTML.    None
-
-                              **Example:**
-
-                              page.10.removeAttributes = class,id
 ================  ==========  =======================================================  ========
 
 [tsref:(cObject).tx_css2inline_pi1]

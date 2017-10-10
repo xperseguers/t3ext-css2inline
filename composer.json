@@ -22,10 +22,11 @@
       "role": "Developer"
     }
   ],
-  "license": "GPL-2.0+",
+  "license": "LGPL-3.0",
   "require": {
     "php": ">= 5.5.0, <= 7.1.99",
-    "typo3/cms-core": ">= 7.6.0, <= 8.7.99"
+    "typo3/cms": ">= 7.6.0, <= 8.7.99",
+    "pelago/emogrifier": "^1.2"
   },
   "replace": {
     "css2inline": "self.version",
@@ -39,6 +40,25 @@
     "post-autoload-dump": [
       "mkdir -p .Build/Web/typo3conf/ext/",
       "[ -L .Build/Web/typo3conf/ext/css2inline ] || ln -snvf ../../../../. .Build/Web/typo3conf/ext/css2inline"
+    ],
+    "extension-create-libs": [
+      "mkdir -p Libraries/temp",
+      "[ -f $HOME/.composer/vendor/bin/phar-composer ] || composer global require clue/phar-composer",
+      "if [ ! -f Libraries/pelago-emogrifier.phar ]; then cd Libraries/temp && composer require pelago/emogrifier=^1.2 && composer config classmap-authoritative true && composer config prepend-autoloader false && composer dump-autoload; fi",
+      "[ -f Libraries/pelago-emogrifier.phar ] || $HOME/.composer/vendor/bin/phar-composer build Libraries/temp/ Libraries/pelago-emogrifier.phar",
+      "chmod -x Libraries/*.phar",
+      "rm -rf Libraries/temp"
+    ],
+    "extension-build": [
+      "@extension-create-libs"
+    ],
+    "extension-release": [
+      "@extension-build",
+      "rm -rf Tests/",
+      "rm .gitignore"
+    ],
+    "extension-clean": [
+      "rm -rf Libraries"
     ]
   },
   "extra": {
