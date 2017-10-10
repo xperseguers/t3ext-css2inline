@@ -57,8 +57,8 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
      */
     function main($content, $conf)
     {
-        $css = $this->cObj->cObjGet($conf['css.']);
-        $html = $this->cObj->cObjGet($conf['html.']);
+        $css = $this->cObj->cObjGetSingle($conf['css'], $conf['css.']);
+        $html = $this->cObj->cObjGetSingle($conf['html'] ?: 'COA', $conf['html.']);
         $charset = $GLOBALS['TSFE']->config['config']['renderCharset'];
         $this->encoding = $charset ? $charset : 'iso-8859-1';
         $this->setCSS($css);
