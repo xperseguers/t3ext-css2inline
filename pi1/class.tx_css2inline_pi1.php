@@ -53,11 +53,13 @@ class tx_css2inline_pi1 extends \TYPO3\CMS\Frontend\Plugin\AbstractPlugin
      */
     public function main($content, array $conf)
     {
+        /*
         // Require 3rd-party libraries, in case TYPO3 does not run in composer mode
         $pharFileName = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath($this->extKey) . 'Libraries/pelago-emogrifier.phar';
         if (is_file($pharFileName)) {
             @include 'phar://' . $pharFileName . '/vendor/autoload.php';
         }
+        */
 
         $css = $this->cObj->cObjGetSingle($conf['css'], $conf['css.']);
         $html = $this->cObj->cObjGetSingle($conf['html'] ?: 'COA', $conf['html.']);
