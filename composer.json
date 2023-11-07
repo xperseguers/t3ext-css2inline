@@ -22,25 +22,13 @@
       "role": "Developer"
     }
   ],
-  "license": "LGPL-3.0",
+  "license": "LGPL-3.0-or-later",
   "require": {
     "php": ">= 5.5.0, <= 7.1.99",
     "typo3/cms": ">= 7.6.0, <= 8.7.99",
     "pelago/emogrifier": "^1.2"
   },
-  "replace": {
-    "css2inline": "self.version",
-    "typo3-ter/css2inline": "self.version"
-  },
-  "config": {
-    "vendor-dir": ".Build/vendor",
-    "bin-dir": ".Build/bin"
-  },
   "scripts": {
-    "post-autoload-dump": [
-      "mkdir -p .Build/Web/typo3conf/ext/",
-      "[ -L .Build/Web/typo3conf/ext/css2inline ] || ln -snvf ../../../../. .Build/Web/typo3conf/ext/css2inline"
-    ],
     "extension-create-libs": [
       "mkdir -p Libraries/temp",
       "[ -f $HOME/.composer/vendor/bin/phar-composer ] || composer global require clue/phar-composer",
@@ -66,8 +54,7 @@
       "dev-master": "0.3.x-dev"
     },
     "typo3/cms": {
-      "cms-package-dir": "{$vendor-dir}/typo3/cms",
-      "web-dir": ".Build/Web"
+      "extension-key": "css2inline"
     }
   }
 }
